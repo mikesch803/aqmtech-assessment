@@ -66,7 +66,7 @@ Ensure you have the following installed:
 
 ### 1️⃣ Clone the repository
 
-git clone https://github.com/your-username/aqmtech-assessment.git
+git clone https://github.com/mikesch803/aqmtech-assessment.git
 cd aqmtech-assessment
 
 ### 2️⃣ Create & activate virtual environment
