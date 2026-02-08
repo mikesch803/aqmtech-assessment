@@ -1,0 +1,36 @@
+
+body {
+  overflow-x: hidden;
+}
+
+.gallery-container {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  position: relative;
+}
+
+.gallery-grid {
+  padding: 16px;
+  transition: margin-right 0.3s ease;
+}
+
+.gallery-container.preview-open .gallery-grid {
+  margin-right: 420px;
+}
+
+@media (max-width: 1024px) {
+  .gallery-container.preview-open .gallery-grid {
+    margin-right: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gallery-container {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-grid {
+    padding: 8px;
+    margin-right: 0 !important;
+  }
+}

@@ -1,19 +1,25 @@
-import os
-from fastapi import Depends, FastAPI, HTTPException, UploadFile, File
+from schema.schema import ImageCreate
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from dotenv import load_dotenv
 load_dotenv()
-from util import upload_image_to_s3
-from model import Image
-
-
-from db import SessionLocal, engine
+from model.model import Image
+from db.db import Base, SessionLocal, engine
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
-app.mount("/images", StaticFiles(directory="images"), name="images")
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (for development only)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -35,22 +41,17 @@ def db_check():
 def health_check():
     return {"status": "ok"}
 
-@app.post("/api/images/upload")
-def upload_image(
-    title: str,
-    description: str | None = None,
-    file: UploadFile = File(...),
+@app.post("/api/images")
+def create_image(
+    payload: ImageCreate,
     db: Session = Depends(get_db),
 ):
-    image_url = upload_image_to_s3(file)
-
     new_image = Image(
-        title=title,
-        description=description,
-        file_path=file.filename,
+        title=payload.title,
+        description=payload.description,
+        image_url=str(payload.image_url),
         width=None,
         height=None,
-        image_url=image_url,
     )
 
     db.add(new_image)
@@ -62,7 +63,6 @@ def upload_image(
         "title": new_image.title,
         "image_url": new_image.image_url,
     }
-
 
 @app.get("/api/images")
 def get_images(db: Session = Depends(get_db)):
